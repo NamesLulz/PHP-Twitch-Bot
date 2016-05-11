@@ -2,7 +2,25 @@
 This is a PHP written bot specifically for Twitch.
 To open the bot, you must use PHP-CLI.
 
-# Chat-Commands
+#Console Commands
+The current console commands are:
+
+help (update, default, keys mysql, or just leave it empty for commands)
+
+stop,close,quit,exit,destroy,leave (to close out of the console)
+
+update (key variable, see "help update" for more information)
+
+default (key, see "help default for more information)
+
+mysql (true or false, still in development)
+
+check (key, finds out what the key variable is set too, see "help keys" for a lit of keys)
+
+connect (connects the bot with the configuration variables)
+
+
+# Chat Commands
 The current chat commands are:
 
 !echo (message)
