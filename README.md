@@ -7,7 +7,9 @@ The current chat commands are:
 
 !echo (message)
 
-!google (what to google)
+!google (what to search on google)
+
+!youtube (what to search on youtube)
 
 !join (chat room)
 
