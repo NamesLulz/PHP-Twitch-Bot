@@ -360,11 +360,11 @@ class Bot
 				$temp_config = fopen('config-bot.txt', 'a+');
 				fwrite($temp_config, json_encode($this->config));
 				fclose($temp_config);
-				$temp_destroy_config = fopen('config-mysql.txt', 'w+');
-				fclose($temp_destroy_config);
-				$temp_config = fopen('config-mysql.txt', 'a+');
-				fwrite($temp_config, json_encode($this->config));
-				fclose($temp_config);
+				$temp_destroy_config_ = fopen('config-mysql.txt', 'w+');
+				fclose($temp_destroy_config_);
+				$temp_config_ = fopen('config-mysql.txt', 'a+');
+				fwrite($temp_config_, json_encode($this->mysql));
+				fclose($temp_config_);
 
 				fclose($handle);
 				$this->message('message', 'Goodbye!');
@@ -417,12 +417,16 @@ class Bot
 				for($i = 4; $i < count($ex); $i++)
 				{
 					if($i == 4)
+					{
 						$msg = $ex[$i];
+					}
 					else
+					{
 						$msg = $msg . ' ' . $ex[$i];
+					}
 				}
 				
-				fputs($this->socket, "PRIVMSG " . $ex[2] . " :" . $msg . "\n"); $this->message('sent', 'Sent a message to, "' . $ex[2] . '".'); $this->message('sent', 'Saying, "' . $msg . '".');
+				fputs($this->socket, "PRIVMSG " . $ex[2] . " :" . $msg . "\n"); $this->message('sent', 'Sent a message to, "' . $ex[2] . '".'); $this->message('sent', 'Saying, "' . trim($msg) . '".');
 			break;
 			case ":!google":
 				$msg = "https://www.google.com/search?q=";
@@ -434,7 +438,7 @@ class Bot
 						$msg = $msg . '%20' . $ex[$i];
 				}
 
-				fputs($this->socket, "PRIVMSG " . $ex[2] . " :" . $msg . "\n"); $this->message('sent', 'Sent a message to, "' . $ex[2] . '".'); $this->message('sent', 'Saying, "' . $msg . '".');
+				fputs($this->socket, "PRIVMSG " . $ex[2] . " :" . $msg . "\n"); $this->message('sent', 'Sent a message to, "' . $ex[2] . '".'); $this->message('sent', 'Saying, "' . trim($msg) . '".');
 			break;
 			case ":!youtube":
 				$msg = "https://www.youtube.com/results?search_query=";
@@ -462,11 +466,11 @@ class Bot
 				$temp_config = fopen('config-bot.txt', 'a+');
 				fwrite($temp_config, json_encode($this->config));
 				fclose($temp_config);
-				$temp_destroy_config = fopen('config-mysql.txt', 'w+');
-				fclose($temp_destroy_config);
-				$temp_config = fopen('config-mysql.txt', 'a+');
-				fwrite($temp_config, json_encode($this->config));
-				fclose($temp_config);
+				$temp_destroy_config_ = fopen('config-mysql.txt', 'w+');
+				fclose($temp_destroy_config_);
+				$temp_config_ = fopen('config-mysql.txt', 'a+');
+				fwrite($temp_config_, json_encode($this->mysql));
+				fclose($temp_config_);
 				fclose($this->socket); $this->message('info', 'Socket closed.');
 				$this->message('message', 'Goodbye!');
 				exit;
