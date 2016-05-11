@@ -4,9 +4,8 @@ error_reporting(FALSE);
 
 class Bot
 {
-	var $socket;
-
-	var $config = array(
+	var $socket, $config;
+	var $empty_config = array(
 		'server' => 'irc.twitch.tv',
 		'port' => 6667,
 		'pass' => '',
@@ -15,19 +14,9 @@ class Bot
 		'channel' => ''
 	);
 
-	var $confih = array(
-		'server' => 'irc.twitch.tv',
-		'port' => 6667,
-		'pass' => '',
-		'nick' => '',
-		'user' => '',
-		'channel' => ''
-	);
-	
 	/*
 	** MySQL is in development.
 	*/
-
 	var $sql = false;
 	var $mysql = array(
 		'mysql-host' => '',
@@ -50,36 +39,73 @@ class Bot
 		{
 			case "message":
 				echo "= Message: " . $message . "\n";
+				fwrite($this->debug_file, 'message: ' . $message . "\n");
 			break;
 			case "info":
 				echo "= Info: " . $message . "\n";
+				fwrite($this->debug_file, 'info: ' . $message . "\n");
 			break;
 			case "cursor":
 				echo "> ";
 			break;
 			case "commands":
 				echo "= Commands: " . $message . "\n";
+				fwrite($this->debug_file, 'commands: ' . $message . "\n");
 			break;
 			case "error":
 				echo "= Error: " . $message . "\n";
+				fwrite($this->debug_file, 'error: ' . $message . "\n");
 			break;
 			case "sent":
 				echo "= Sent data: " . $message . "\n";
+				fwrite($this->debug_file, 'sent: ' . $message . "\n");
 			break;
 			case "received":
 				echo "= Received data: " . $message . "\n";
+				fwrite($this->debug_file, 'received: ' . $message . "\n");
 			break;
 			case "check":
 				echo "= Checked (key : value): " . $message . "\n";
+				fwrite($this->debug_file, 'check: ' . $message . "\n");
 			break;
 			default:
 				echo "= Error: Unknown type used, " . trim($type) . "\n";
+				fwrite($this->debug_file, 'error: ' . trim($type) . "\n");
 			break;
 		}
 	}
 	
 	public function onOpen()
 	{
+		if(!file_exists('debug.txt'))
+		{
+			$this->debug_file = fopen('debug.txt', 'a+');
+			fwrite($this->debug_file, "First opened on: " . date('l jS \of F Y h:i:s A') . ".\n");
+		}
+		else
+		{
+			$this->debug_file = fopen('debug.txt', 'a+');
+			fwrite($this->debug_file, "Opened on: " . date('l jS \of F Y h:i:s A') . ".\n");
+		}
+
+		if(!file_exists('config.txt'))
+		{
+			$config_file = fopen('config.txt', 'a+');
+			fwrite($config_file, json_encode($this->empty_config));
+			fwrite($this->debug_file, "Created config file, wrote inside: " . $this->empty_config . "\n");
+			fclose($config_file);
+
+			$config_file = fopen('config.txt', 'a+');
+			$this->config = json_decode(fread($config_file, filesize('config.txt')));
+			$this->confih = $this->config;
+		}
+		else
+		{
+			$config_file = fopen('config.txt', 'a+');
+			$this->config = json_decode(fread($config_file, filesize('config.txt')));
+			$this->confih = $this->config;
+		}
+
 		$this->message('message', 'Welcome to NamesLulz\'s bot!');
 		$this->message('info', 'Type, "help" for a list of commands.');
 		$this->console();
@@ -90,6 +116,7 @@ class Bot
 		$this->message('cursor');
 		$handle = fopen('php://stdin', 'r');
 		$ex = explode(' ', trim(fgets($handle)));
+		fwrite($this->debug_file, "input: " . json_encode($ex) . "\n");
 		
 		switch(strtolower($ex[0]))
 		{
@@ -119,9 +146,11 @@ class Bot
 			break;
 			case "exit":
 			case "stop":
+			case "quit":
 			case "close":
 			case "leave":
 			case "destroy":
+				fwrite($this->config_file, $this->config);
 				fclose($handle);
 				$this->message('message', 'Goodbye!');
 				exit;
@@ -259,10 +288,6 @@ class Bot
 							$this->message('check', $key . ' : ' . $value);
 							$found = true;
 						}
-						else if($key == "channel" && $found == false)
-						{
-							$this->message('error', 'Unable to find key, "' . $ex[1] . '".');
-						}
 					}
 					
 					foreach($this->mysql as $key => $value)
@@ -275,7 +300,7 @@ class Bot
 						else if($key == "mysql-data" && $found == false)
 						{
 							$this->message('error', 'Unable to find key, "' . $ex[1] . '".');
-							$found = true; //give up
+							$found = true;
 						}
 					}
 				}
@@ -284,23 +309,8 @@ class Bot
 				fclose($handle);
 				$this->login();
 			break;
-			case "test":
-				$test = array(
-					'test' => function($data)
-					{
-						$this->message('message', 'Test: "' . $data . '".');
-					}
-				);
-
-				for($i = 1; $i < count($ex); $i++)
-				{
-					if($i == 1)
-						$msg = $ex[$i];
-					else
-						$msg = $msg . ' ' . $ex[$i];
-				}
-
-				$test['test']($msg);
+			default:
+				$this->message('error', 'Unknown command, "' . $ex[0] . '". Type, "help" for a list of commands.');
 			break;
 		}
 		
@@ -318,7 +328,7 @@ class Bot
 			fputs($this->socket, "NICK " . $this->config['nick'] . "\r\n"); $this->message('sent', 'Sent nick, "' . $this->config['nick'] . '".');
 			fputs($this->socket, "USER " . $this->config['user'] . "\r\n"); $this->message('sent', 'Sent user, "' . $this->config['user'] . '".');
 			fputs($this->socket, "JOIN " . $this->config['channel'] . "\r\n"); $this->message('sent', 'Joined channel, "' . $this->config['channel'] . '".');
-			$this->botloop();
+			$this->bot_();
 		}
 		else
 		{
@@ -330,7 +340,7 @@ class Bot
 		}
 	}
 	
-	public function botloop()
+	public function bot_()
 	{
 		$data = fgets($this->socket);
 		$this->message('received', nl2br($data));
@@ -349,13 +359,9 @@ class Bot
 				for($i = 4; $i < count($ex); $i++)
 				{
 					if($i == 4)
-					{
 						$msg = $ex[$i];
-					}
 					else
-					{
 						$msg = $msg . ' ' . $ex[$i];
-					}
 				}
 				
 				fputs($this->socket, "PRIVMSG " . $ex[2] . " :" . $msg . "\n"); $this->message('sent', 'Sent a message to, "' . $ex[2] . '".'); $this->message('sent', 'Saying, "' . $msg . '".');
@@ -365,13 +371,21 @@ class Bot
 				for($i = 4; $i < count($ex); $i++)
 				{
 					if($i == 4)
-					{
 						$msg .= $ex[$i];
-					}
 					else
-					{
 						$msg = $msg . '%20' . $ex[$i];
-					}
+				}
+
+				fputs($this->socket, "PRIVMSG " . $ex[2] . " :" . $msg . "\n"); $this->message('sent', 'Sent a message to, "' . $ex[2] . '".'); $this->message('sent', 'Saying, "' . $msg . '".');
+			break;
+			case ":!youtube":
+				$msg = "https://www.youtube.com/results?search_query=";
+				for($i = 4; $i < count($ex); $i++)
+				{
+					if($i == 4)
+						$msg .= $ex[$i];
+					else
+						$msg = $msg . '%20' . $ex[$i];
 				}
 
 				fputs($this->socket, "PRIVMSG " . $ex[2] . " :" . $msg . "\n"); $this->message('sent', 'Sent a message to, "' . $ex[2] . '".'); $this->message('sent', 'Saying, "' . $msg . '".');
@@ -385,13 +399,14 @@ class Bot
 				$this->console();
 			break;
 			case ":!exit":
+				fwrite($this->config_file, $this->config);
 				fclose($this->socket); $this->message('info', 'Socket closed.');
 				$this->message('message', 'Goodbye!');
 				exit;
 			break;
 		}
 		
-		$this->botloop();
+		$this->bot_();
 	}
 }
 
