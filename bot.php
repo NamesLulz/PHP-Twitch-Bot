@@ -209,28 +209,28 @@ class Bot
 				switch(strtolower($ex[1]))
 				{
 					case "server":
-						$this->config['server'] = $this->confih['server'];
-						$this->message('message', 'Using default serer, "' . $this->confih['server'] . '".');
+						$this->config->server = $this->confih->server;
+						$this->message('message', 'Using default serer, "' . $this->confih->server . '".');
 					break;
 					case "port":
-						$this->config['port'] = $this->confih['port'];
-						$this->message('message', 'Using default port, "' . $this->confih['port'] . '".');
+						$this->config->port = $this->confih->port;
+						$this->message('message', 'Using default port, "' . $this->confih->port . '".');
 					break;
 					case "pass":
-						$this->config['pass'] = $this->confih['pass'];
-						$this->message('message', 'Using default pass, "' . $this->confih['pass'] . '".');
+						$this->config->pass = $this->confih->pass;
+						$this->message('message', 'Using default pass, "' . $this->confih->pass . '".');
 					break;
 					case "nick":
-						$this->config['nick'] = $this->confih['nick'];
-						$this->message('message', 'Using default nick, "' . $this->confih['nick'] . '".');
+						$this->config->nick = $this->confih->nick;
+						$this->message('message', 'Using default nick, "' . $this->confih->nick . '".');
 					break;
 					case "user":
-						$this->config['user'] = $this->confih['user'];
-						$this->message('message', 'Using default user, "' . $this->confih['user'] . '".');
+						$this->config->user = $this->confih->user;
+						$this->message('message', 'Using default user, "' . $this->confih->user . '".');
 					break;
 					case "channel":
-						$this->config['channel'] = $this->confih['channel'];
-						$this->message('message', 'Using default channel, "' . $this->confih['channel'] . '".');
+						$this->config->channel = $this->confih->channel;
+						$this->message('message', 'Using default channel, "' . $this->confih->channel . '".');
 					break;
 					case "mysql-server":
 						$this->mysql['mysql-server'] = $this->mysqm['mysql-server'];
