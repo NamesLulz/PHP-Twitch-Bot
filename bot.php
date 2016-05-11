@@ -90,19 +90,19 @@ class Bot
 
 		if(!file_exists('config.txt'))
 		{
-			$config_file = fopen('config.txt', 'a+');
-			fwrite($config_file, json_encode($this->empty_config));
-			fwrite($this->debug_file, "Created config file, wrote inside: " . $this->empty_config . "\n");
-			fclose($config_file);
+			$this->config_file = fopen('config.txt', 'a+');
+			fwrite($this->config_file, json_encode($this->empty_config));
+			fwrite($this->debug_file, "Created config file, wrote inside: " . json_encode($this->empty_config) . "\n");
+			fclose($this->config_file);
 
-			$config_file = fopen('config.txt', 'a+');
-			$this->config = json_decode(fread($config_file, filesize('config.txt')));
+			$this->config_file = fopen('config.txt', 'c+');
+			$this->config = json_decode(fread($this->config_file, filesize('config.txt')));
 			$this->confih = $this->config;
 		}
 		else
 		{
-			$config_file = fopen('config.txt', 'a+');
-			$this->config = json_decode(fread($config_file, filesize('config.txt')));
+			$this->config_file = fopen('config.txt', 'c+');
+			$this->config = json_decode(fread($this->config_file, filesize('config.txt')));
 			$this->confih = $this->config;
 		}
 
@@ -150,7 +150,10 @@ class Bot
 			case "close":
 			case "leave":
 			case "destroy":
-				fwrite($this->config_file, $this->config);
+				$destroy_file = fopen('config.txt', 'w+');
+				fwrite($destroy_file, '');
+				fclose($destroy_file);
+				fwrite($this->config_file, json_encode($this->config));
 				fclose($handle);
 				$this->message('message', 'Goodbye!');
 				exit;
@@ -159,27 +162,27 @@ class Bot
 				switch(strtolower($ex[1]))
 				{
 					case "server":
-						$this->config['server'] = $ex[2];
+						$this->config->server = $ex[2];
 						$this->message('message', 'Server updated to, "' . $ex[2] . '".');
 					break;
 					case "port":
-						$this->config['port'] = $ex[2];
+						$this->config->port = $ex[2];
 						$this->message('message', 'Port updated to, "' . $ex[2] . '".');
 					break;
 					case "pass":
-						$this->config['pass'] = $ex[2];
+						$this->config->pass = $ex[2];
 						$this->message('message', 'Pass updated to, "' . $ex[2] . '".');
 					break;
 					case "nick":
-						$this->config['nick'] = $ex[2];
+						$this->config->nick = $ex[2];
 						$this->message('message', 'Nick updated to, "' . $ex[2] . '".');
 					break;
 					case "user":
-						$this->config['user'] = $ex[2];
+						$this->config->user = $ex[2];
 						$this->message('message', 'User updated to, "' . $ex[2] . '".');
 					break;
 					case "channel":
-						$this->config['channel'] = $ex[2];
+						$this->config->channel = $ex[2];
 						$this->message('message', 'Channel updated to, "' . $ex[2] . '".');
 					break;
 					case "mysql-host":
@@ -399,7 +402,7 @@ class Bot
 				$this->console();
 			break;
 			case ":!exit":
-				fwrite($this->config_file, $this->config);
+				fwrite($this->config_file, json_encode($this->config));
 				fclose($this->socket); $this->message('info', 'Socket closed.');
 				$this->message('message', 'Goodbye!');
 				exit;
