@@ -4,7 +4,7 @@ error_reporting(FALSE);
 
 class Bot
 {
-	var $socket, $config;
+	var $socket, $config, $connection, $sql = false;
 	var $empty_config = array(
 		'server' => 'irc.twitch.tv',
 		'port' => 6667,
@@ -14,22 +14,11 @@ class Bot
 		'channel' => ''
 	);
 
-	/*
-	** MySQL is in development.
-	*/
-	var $sql = false;
-	var $mysql = array(
-		'mysql-host' => '',
-		'mysql-user' => '',
-		'mysql-pass' => '',
-		'mysql-data' => ''
-	);
-	
-	var $mysqm = array(
-		'mysql-host' => '',
-		'mysql-user' => '',
-		'mysql-pass' => '',
-		'mysql-data' => ''
+	var $empty_mysql_config = array(
+		'mysql_host' => '',
+		'mysql_user' => '',
+		'mysql_pass' => '',
+		'mysql_data' => ''
 	);
 
 	public function message($type, $message)
@@ -88,24 +77,44 @@ class Bot
 			fwrite($this->debug_file, "Opened on: " . date('l jS \of F Y h:i:s A') . ".\n");
 		}
 
-		if(!file_exists('config.txt'))
+		if(!file_exists('config-bot.txt'))
 		{
-			$this->config_file = fopen('config.txt', 'a+');
+			$this->config_file = fopen('config-bot.txt', 'a+');
 			fwrite($this->config_file, json_encode($this->empty_config));
-			fwrite($this->debug_file, "Created config file, wrote inside: " . json_encode($this->empty_config) . "\n");
+			fwrite($this->debug_file, "Created config-bot file, wrote inside: " . json_encode($this->empty_config) . "\n");
 			fclose($this->config_file);
 
-			$this->config_file = fopen('config.txt', 'a+');
-			$this->config = json_decode(fread($this->config_file, filesize('config.txt')));
+			$this->config_file = fopen('config-bot.txt', 'a+');
+			$this->config = json_decode(fread($this->config_file, filesize('config-bot.txt')));
 			$this->confih = $this->config;
 			fclose($this->config_file);
 		}
 		else
 		{
-			$this->config_file = fopen('config.txt', 'c+');
-			$this->config = json_decode(fread($this->config_file, filesize('config.txt')));
+			$this->config_file = fopen('config-bot.txt', 'c+');
+			$this->config = json_decode(fread($this->config_file, filesize('config-bot.txt')));
 			$this->confih = $this->config;
 			fclose($this->config_file);
+		}
+
+		if(!file_exists('config-mysql.txt'))
+		{
+			$this->mysql_file = fopen('config-mysql.txt', 'a+');
+			fwrite($this->mysql_file, json_encode($this->empty_mysql_config));
+			fwrite($this->debug_file, "Created config-mysql file, wrote inside: " . json_encode($this->empty_mysql_config) . "\n");
+			fclose($this->mysql_file);
+
+			$this->mysql_file = fopen('config-mysql.txt', 'a+');
+			$this->mysql = json_decode(fread($this->mysql_file, filesize('config-mysql.txt')));
+			$this->mysqm = $this->mysql;
+			fclose($this->mysql_file);
+		}
+		else
+		{
+			$this->mysql_file = fopen('config-mysql.txt', 'c+');
+			$this->mysql = json_decode(fread($this->mysql_file, filesize('config-mysql.txt')));
+			$this->mysqm = $this->mysql;
+			fclose($this->mysql_file);
 		}
 
 		$this->message('message', 'Welcome to NamesLulz\'s bot!');
@@ -119,7 +128,7 @@ class Bot
 		$handle = fopen('php://stdin', 'r');
 		$ex = explode(' ', trim(fgets($handle)));
 		fwrite($this->debug_file, "input: " . json_encode($ex) . "\n");
-		
+
 		switch(strtolower($ex[0]))
 		{
 			case "help":
@@ -145,24 +154,6 @@ class Bot
 						$this->message('commands', '"help", "exit", "update", "default", "mysql", "check".');
 					break;
 				}
-			break;
-			case "exit":
-			case "stop":
-			case "quit":
-			case "close":
-			case "leave":
-			case "destroy":
-				fwrite($this->debug_file, 'Attempting to destroy all contents in config.txt to override.');
-				$temp_destroy_config = fopen('config.txt', 'w+');
-				fclose($temp_destroy_config);
-				fwrite($this->debug_file, 'Done, now attempting to write new contents in config.txt.');
-				$temp_config = fopen('config.txt', 'a+');
-				fwrite($temp_config, json_encode($this->config));
-				fclose($temp_config);
-				fwrite($this->debug_file, 'Done.');
-				fclose($handle);
-				$this->message('message', 'Goodbye!');
-				exit;
 			break;
 			case "update":
 				switch(strtolower($ex[1]))
@@ -192,19 +183,19 @@ class Bot
 						$this->message('message', 'Channel updated to, "' . $ex[2] . '".');
 					break;
 					case "mysql-host":
-						$this->mysql['mysql-host'] = $ex[2];
+						$this->mysql->mysql_host = $ex[2];
 						$this->message('message', 'Mysql-host updated to, "' . $ex[2] . '".');
 					break;
 					case "mysql-user":
-						$this->mysql['mysql-host'] = $ex[2];
+						$this->mysql->mysql_user = $ex[2];
 						$this->message('message', 'Mysql-host updated to, "' . $ex[2] . '".');
 					break;
 					case "mysql-pass":
-						$this->mysql['mysql-pass'] = $ex[2];
+						$this->mysql->mysql_pass = $ex[2];
 						$this->message('message', 'Mysql-pass updated to, "' . $ex[2] . '".');
 					break;
 					case "mysql-data":
-						$this->mysql['mysql-data'] = $ex[2];
+						$this->mysql->mysql_data = $ex[2];
 						$this->message('message', 'Mysql-data updated to, "' . $ex[2] . '".');
 					break;
 					default:
@@ -241,20 +232,20 @@ class Bot
 						$this->message('message', 'Using default channel, "' . $this->confih->channel . '".');
 					break;
 					case "mysql-server":
-						$this->mysql['mysql-server'] = $this->mysqm['mysql-server'];
-						$this->message('message', 'Using default mysql-server, "' . $this->mysqm['mysql-server'] . '".');
+						$this->mysql->mysql_server = $this->mysqm->mysql_server;
+						$this->message('message', 'Using default mysql-server, "' . $this->mysqm->mysql_server . '".');
 					break;
 					case "mysql-user":
-						$this->mysql['mysql-user'] = $this->mysqm['mysql-user'];
-						$this->message('message', 'Using default mysql-user, "' . $this->mysqm['mysql-user'] . '".');
+						$this->mysql->mysql_user = $this->mysqm->mysql_user;
+						$this->message('message', 'Using default mysql-user, "' . $this->mysqm->mysql_user . '".');
 					break;
 					case "mysql-pass":
-						$this->mysql['mysql-pass'] = $this->mysqm['mysql-pass'];
-						$this->message('message', 'Using default mysql-pass, "' . $this->mysqm['mysql-pass'] . '".');
+						$this->mysql->mysql_pass = $this->mysqm->mysql_pass;
+						$this->message('message', 'Using default mysql-pass, "' . $this->mysqm->mysql_pass . '".');
 					break;
 					case "mysql-data":
-						$this->mysql['mysql-data'] = $this->mysqm['mysql-data'];
-						$this->message('message', 'Using default mysql-data, "' . $this->mysqm['mysql-data'] . '".');
+						$this->mysql->mysql_data = $this->mysqm->mysql_data;
+						$this->message('message', 'Using default mysql-data, "' . $this->mysqm->mysql_data . '".');
 					break;
 					default:
 						$this->message('error', 'Unknown key, "' . $ex[2] . '".');
@@ -263,21 +254,61 @@ class Bot
 				}
 			break;
 			case "mysql":
-				if($ex[2] == true && $this->sql == false)
+				if($ex[1] == "true" && $this->sql == false)
 				{
 					$this->sql = true;
-					$this->message('message', 'MySQL enabled.');
+					if($this->mysql->mysql_data == null || $this->mysql->mysql_data == "")
+					{
+						$this->connection = new mysqli($this->mysql->mysql->host, $this->mysql->mysql_user, $this->mysql->mysql_pass);
+					}
+					else
+					{
+						$this->connection = new mysqli($this->mysql->mysql_host, $this->mysql->mysql_user, $this->mysql->mysql_pass, $this->mysql->mysql_data);
+					}
+
+					if($this->connection->sqlstate != null && $this->connection)
+					{
+						fwrite($this->debug_file, "MySQL connection online.\n");
+						$this->message('message', 'MySQL connection online.');
+					}
+					else
+					{
+						$this->message('error', 'Unable to connect; check debug logs for more info.');
+						if($this->connection->errno == null && $this->connection->error == null)
+						{
+							fwrite($this->debug_file, "If all the variables below are null, your server is offline or variables are not set.\n");
+							fwrite($this->debug_file, "More info: " . json_encode($this->connection) . "\n");
+							$this->connection->close();
+						}
+						else
+						{
+							fwrite($this->debug_file, "Error number: " . $this->connection->errno . "\n");
+							fwrite($this->debug_file, "Error string: " . $this->connection->error . "\n");
+							$this->connection->close();
+						}
+					}
 				}
-				else if($ex[2] == true && $this->sql == true)
+				else if($ex[1] == "true" && $this->sql == true)
 				{
 					$this->message('error', 'MySQL is already enabled.');
+
+					if($this->connection)
+					{
+						$this->message('info', 'MySQL connection is online.');
+					}
+					else
+					{
+						$this->sql = false;
+						$this->message('info', 'MySQL connection is online, retry the command.');
+					}
 				}
-				else if($ex[2] == false && $this->sql == true)
+				else if($ex[1] == "false" && $this->sql == true)
 				{
 					$this->sql = false;
+					$this->connection->close();
 					$this->message('message', 'MySQL disabled.');
 				}
-				else if($ex[2] == false && $this->sql == false)
+				else if($ex[1] == "false" && $this->sql == false)
 				{
 					$this->message('error', 'MySQL is already disabled.');
 				}
@@ -317,6 +348,27 @@ class Bot
 			case "connect":
 				fclose($handle);
 				$this->login();
+			break;
+			case "exit":
+			case "stop":
+			case "quit":
+			case "close":
+			case "leave":
+			case "destroy":
+				$temp_destroy_config = fopen('config-bot.txt', 'w+');
+				fclose($temp_destroy_config);
+				$temp_config = fopen('config-bot.txt', 'a+');
+				fwrite($temp_config, json_encode($this->config));
+				fclose($temp_config);
+				$temp_destroy_config = fopen('config-mysql.txt', 'w+');
+				fclose($temp_destroy_config);
+				$temp_config = fopen('config-mysql.txt', 'a+');
+				fwrite($temp_config, json_encode($this->config));
+				fclose($temp_config);
+
+				fclose($handle);
+				$this->message('message', 'Goodbye!');
+				exit;
 			break;
 			default:
 				$this->message('error', 'Unknown command, "' . $ex[0] . '". Type, "help" for a list of commands.');
@@ -405,10 +457,14 @@ class Bot
 				$this->console();
 			break;
 			case ":!exit":
-				$temp_destroy_config = fopen('config.txt', 'w+');
+				$temp_destroy_config = fopen('config-bot.txt', 'w+');
 				fclose($temp_destroy_config);
-				
-				$temp_config = fopen('config.txt', 'a+');
+				$temp_config = fopen('config-bot.txt', 'a+');
+				fwrite($temp_config, json_encode($this->config));
+				fclose($temp_config);
+				$temp_destroy_config = fopen('config-mysql.txt', 'w+');
+				fclose($temp_destroy_config);
+				$temp_config = fopen('config-mysql.txt', 'a+');
 				fwrite($temp_config, json_encode($this->config));
 				fclose($temp_config);
 				fclose($this->socket); $this->message('info', 'Socket closed.');
