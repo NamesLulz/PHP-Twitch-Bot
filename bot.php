@@ -328,25 +328,22 @@ class Bot
 	
 	public function login()
 	{
-		$this->socket = fsockopen($this->config['server'], $this->config['port'], $errno, $errstr);
+		$this->socket = fsockopen($this->config->server, $this->config->port, $errno, $errstr);
 		
-		if($this->socket)
-		{
-			$this->message('info', 'Socket opened.');		
-			fputs($this->socket, "PASS " . $this->config['pass'] . "\r\n"); $this->message('sent', 'Sent pass, "' . $this->config['pass'] . '".');
-			fputs($this->socket, "NICK " . $this->config['nick'] . "\r\n"); $this->message('sent', 'Sent nick, "' . $this->config['nick'] . '".');
-			fputs($this->socket, "USER " . $this->config['user'] . "\r\n"); $this->message('sent', 'Sent user, "' . $this->config['user'] . '".');
-			fputs($this->socket, "JOIN " . $this->config['channel'] . "\r\n"); $this->message('sent', 'Joined channel, "' . $this->config['channel'] . '".');
-			$this->bot_();
-		}
-		else
+		if(!$this->socket)
 		{
 			$this->message('error', 'Unable to open the socket.');
 			$this->message('error', 'Error number: ' . $errno . '.');
 			$this->message('error', 'Error string: ' . $errstr . '.');
-			$this->socket = null;
 			$this->console();
 		}
+
+		$this->message('info', 'Socket opened.');		
+		fputs($this->socket, "PASS " . $this->config->pass . "\r\n"); $this->message('sent', 'Sent pass, "' . $this->config->pass . '".');
+		fputs($this->socket, "NICK " . $this->config->nick . "\r\n"); $this->message('sent', 'Sent nick, "' . $this->config->nick . '".');
+		fputs($this->socket, "USER " . $this->config->user . "\r\n"); $this->message('sent', 'Sent user, "' . $this->config->user . '".');
+		fputs($this->socket, "JOIN " . $this->config->channel . "\r\n"); $this->message('sent', 'Joined channel, "' . $this->config->channel . '".');
+		$this->bot_();
 	}
 	
 	public function bot_()
