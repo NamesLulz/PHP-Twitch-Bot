@@ -78,13 +78,18 @@ class Bot
 	public function onOpen()
 	{
 		if(!file_exists('debug.txt'))
+		{
 			$this->debug_file = fopen('debug.txt', 'a+');
 			fwrite($this->debug_file, "First opened on: " . date('l jS \of F Y h:i:s A') . ".\n");
+		}
 		else
+		{
 			$this->debug_file = fopen('debug.txt', 'a+');
 			fwrite($this->debug_file, "Opened on: " . date('l jS \of F Y h:i:s A') . ".\n");
+		}
 
 		if(!file_exists('config.txt'))
+		{
 			$this->config_file = fopen('config.txt', 'a+');
 			fwrite($this->config_file, json_encode($this->empty_config));
 			fwrite($this->debug_file, "Created config file, wrote inside: " . json_encode($this->empty_config) . "\n");
@@ -94,11 +99,14 @@ class Bot
 			$this->config = json_decode(fread($this->config_file, filesize('config.txt')));
 			$this->confih = $this->config;
 			fclose($this->config_file);
+		}
 		else
+		{
 			$this->config_file = fopen('config.txt', 'c+');
 			$this->config = json_decode(fread($this->config_file, filesize('config.txt')));
 			$this->confih = $this->config;
 			fclose($this->config_file);
+		}
 
 		$this->message('message', 'Welcome to NamesLulz\'s bot!');
 		$this->message('info', 'Type, "help" for a list of commands.');
@@ -256,17 +264,27 @@ class Bot
 			break;
 			case "mysql":
 				if($ex[2] == true && $this->sql == false)
+				{
 					$this->sql = true;
 					$this->message('message', 'MySQL enabled.');
+				}
 				else if($ex[2] == true && $this->sql == true)
+				{
 					$this->message('error', 'MySQL is already enabled.');
+				}
 				else if($ex[2] == false && $this->sql == true)
+				{
 					$this->sql = false;
 					$this->message('message', 'MySQL disabled.');
+				}
 				else if($ex[2] == false && $this->sql == false)
+				{
 					$this->message('error', 'MySQL is already disabled.');
+				}
 				else
+				{
 					$this->message('error', 'Value must be true or false, not, "' . $ex[2] . '".');
+				}
 			break;
 			case "check":
 				$found = false;
@@ -275,18 +293,24 @@ class Bot
 					foreach($this->config as $key => $value)
 					{
 						if($key == strtolower($ex[1]))
+						{
 							$this->message('check', $key . ' : ' . $value);
 							$found = true;
+						}
 					}
 					
 					foreach($this->mysql as $key => $value)
 					{
 						if($key == strtolower($ex[1]))
+						{
 							$this->message('check', $key . ' : ' . $value);
 							$found = true;
+						}
 						else if($key == "mysql-data" && $found == false)
+						{
 							$this->message('error', 'Unable to find key, "' . $ex[1] . '".');
 							$found = true;
+						}
 					}
 				}
 			break;
@@ -307,18 +331,22 @@ class Bot
 		$this->socket = fsockopen($this->config['server'], $this->config['port'], $errno, $errstr);
 		
 		if($this->socket)
+		{
 			$this->message('info', 'Socket opened.');		
 			fputs($this->socket, "PASS " . $this->config['pass'] . "\r\n"); $this->message('sent', 'Sent pass, "' . $this->config['pass'] . '".');
 			fputs($this->socket, "NICK " . $this->config['nick'] . "\r\n"); $this->message('sent', 'Sent nick, "' . $this->config['nick'] . '".');
 			fputs($this->socket, "USER " . $this->config['user'] . "\r\n"); $this->message('sent', 'Sent user, "' . $this->config['user'] . '".');
 			fputs($this->socket, "JOIN " . $this->config['channel'] . "\r\n"); $this->message('sent', 'Joined channel, "' . $this->config['channel'] . '".');
 			$this->bot_();
+		}
 		else
+		{
 			$this->message('error', 'Unable to open the socket.');
 			$this->message('error', 'Error number: ' . $errno . '.');
 			$this->message('error', 'Error string: ' . $errstr . '.');
 			$this->socket = null;
 			$this->console();
+		}
 	}
 	
 	public function bot_()
@@ -329,7 +357,9 @@ class Bot
 		
 		$ex = explode(' ', $data);
 		if($ex[0] == 'PING')
+		{
 			fputs($this->socket, "PONG " . $ex[1] . "\n"); $this->message('sent', 'Sent pong to server.');
+		}
 		
 		$cmd = str_replace(array(chr(10), chr(13)), '', $ex[3]);
 		switch($cmd)
