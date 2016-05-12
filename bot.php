@@ -57,6 +57,10 @@ class Bot
 				echo "= Checked (key : value): " . $message . "\n";
 				fwrite($this->debug_file, 'check: ' . $message . "\n");
 			break;
+			case "query":
+				echo "= Query result: " . $message . "\n";
+				fwrite($this->debug_file, 'query result: ' . $message . "\n");
+			break;
 			default:
 				echo "= Error: Unknown type used, " . trim($type) . "\n";
 				fwrite($this->debug_file, 'error: ' . trim($type) . "\n");
@@ -317,7 +321,49 @@ class Bot
 					$this->message('error', 'Value must be true or false, not, "' . $ex[2] . '".');
 				}
 			break;
+			case "query":
+				for($i = 1; $i < count($ex); $i++)
+				{
+					if($i == 1)
+					{
+						$query = $ex[$i];
+					}
+					else
+					{
+						$query = $query . ' ' . $ex[$i];
+					}
+				}
+				
+				if(strtolower($ex[1]) == 'select')
+				{
+					$result = $this->connection->query($query);
+					while($row = $result->fetch_assoc())
+					{
+						$data[] = $row;
+					}
+					
+					$this->message('query', json_encode($data));
+				}
+				else
+				{
+					$result = $this->connection->query($query);
+					$this->message('query', json_encode($result);
+				}
+			break;
 			case "check":
+				if($ex[1] == "connection")
+				{
+					$found = true;
+					if($this->connection->errno == null || $this->connection->error == null || !$this->connection)
+					{
+						$this->message('info', 'Connection is offline.');
+					}
+					else
+					{
+						$this->message('info', 'Connection is online.');
+					}
+				}
+				
 				$found = false;
 				while($found == false)
 				{
