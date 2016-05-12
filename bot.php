@@ -350,7 +350,7 @@ class Bot
 				else
 				{
 					$result = $this->connection->query($query);
-					$this->message('query', json_encode($result);
+					$this->message('query', json_encode($result));
 				}
 			break;
 			case "check":
@@ -430,22 +430,6 @@ class Bot
 	
 	public function login()
 	{
-		$count = 0;
-		foreach($this->config as $key => $value)
-		{
-			if($this->config[$key] == null || $this->config[$key] == "")
-			{
-				$count++;
-				$this->message('error', 'Config key, "' . $key . '" is null or empty.');
-			}
-		}
-		
-		if($count != 0)
-		{
-			$this->message('error', 'Unable to run the connect command due to nulled or empty config keys.');
-			$this->console();
-		}
-		
 		$this->socket = fsockopen($this->config->server, $this->config->port, $errno, $errstr);
 		
 		if(!$this->socket)
