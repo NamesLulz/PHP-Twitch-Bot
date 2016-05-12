@@ -148,14 +148,13 @@ class Bot
 					break;
 					case "keys":
 						$this->message('info', 'Config keys: "server", "port", "pass", "nick", "user", "channel".');
-						$this->message('info', 'MySQL keys: "mysql-server", "mysql-user", "mysql-pass", "mysql-data".');
+						$this->message('info', 'MySQL keys: "mysql-server", "mysql-user", "mysql-pass", "mysql-data", "connection".');
 					break;
 					case "mysql":
 						$this->message('info', 'Usage: "mysql true" or "mysql false".');
-						$this->message('info', 'This enables MySQL (not really used at the moment).');
 					break;
 					default:
-						$this->message('commands', '"help", "exit", "update", "default", "mysql", "check".');
+						$this->message('commands', '"help", "exit", "update", "default", "mysql", "check", "query".');
 					break;
 				}
 			break;
@@ -351,6 +350,8 @@ class Bot
 				}
 			break;
 			case "check":
+				$found = false;
+				
 				if($ex[1] == "connection")
 				{
 					$found = true;
@@ -364,7 +365,6 @@ class Bot
 					}
 				}
 				
-				$found = false;
 				while($found == false)
 				{
 					foreach($this->config as $key => $value)
