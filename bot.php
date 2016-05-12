@@ -5,7 +5,7 @@ error_reporting(FALSE);
 class Bot
 {
 	var $socket, $config, $connection, $sql = false;
-	var $empty_config = array(
+	var $empty_config_bot = array(
 		'server' => 'irc.twitch.tv',
 		'port' => 6667,
 		'pass' => '',
@@ -19,6 +19,10 @@ class Bot
 		'mysql_user' => '',
 		'mysql_pass' => '',
 		'mysql_data' => ''
+	);
+	
+	var $empty_config = array(
+		'debug_enabled' => true
 	);
 
 	public function message($type, $message)
@@ -84,8 +88,8 @@ class Bot
 		if(!file_exists('config-bot.txt'))
 		{
 			$this->config_file = fopen('config-bot.txt', 'a+');
-			fwrite($this->config_file, json_encode($this->empty_config));
-			fwrite($this->debug_file, "Created config-bot file, wrote inside: " . json_encode($this->empty_config) . "\n");
+			fwrite($this->config_file, json_encode($this->empty_config_bot));
+			fwrite($this->debug_file, "Created config-bot file, wrote inside: " . json_encode($this->empty_config_bot) . "\n");
 			fclose($this->config_file);
 
 			$this->config_file = fopen('config-bot.txt', 'a+');
@@ -426,6 +430,22 @@ class Bot
 	
 	public function login()
 	{
+		$count = 0;
+		foreach($this->config as $key => $value)
+		{
+			if($this->config[$key] == null || $this->config[$key] == "")
+			{
+				$count++;
+				$this->message('error', 'Config key, "' . $key . '" is null or empty.');
+			}
+		}
+		
+		if($count != 0)
+		{
+			$this->message('error', 'Unable to run the connect command due to nulled or empty config keys.');
+			$this->console();
+		}
+		
 		$this->socket = fsockopen($this->config->server, $this->config->port, $errno, $errstr);
 		
 		if(!$this->socket)
