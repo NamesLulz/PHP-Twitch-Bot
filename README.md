@@ -11,13 +11,15 @@ stop,close,quit,exit,destroy,leave (to close out of the console)
 
 update (key variable, see "help update" for more information)
 
-default (key, see "help default for more information)
+default (key, see "help default" for more information)
 
-mysql (true or false, still in development)
+mysql (true or false)
 
 check (key, finds out what the key variable is set too, see "help keys" for a lit of keys)
 
 connect (connects the bot with the configuration variables)
+
+query (string, uses a query on the connection)
 
 
 # Chat Commands
