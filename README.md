@@ -22,7 +22,7 @@ connect (connects the bot with the configuration variables)
 query (string, uses a query on the connection)
 
 
-# Chat Commands
+#Chat Commands
 The current chat commands are:
 
 !echo (message)
@@ -38,4 +38,13 @@ The current chat commands are:
 !quit (makes the bot disconnect & goes back to the console)
 
 !exit (disconnects the bot & closes the console (check the console to fully close the bot))
+
+#Features
+The bot isn't really different from any other bot.
+
+Has a configuration which can be modified inside or outside of the console.
+
+Has an auto-save feature.
+
+And it's a bot.
 
