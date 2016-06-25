@@ -20,10 +20,54 @@ class Bot
 		'mysql_pass' => '',
 		'mysql_data' => ''
 	);
-	
-	var $empty_config = array(
-		'debug_enabled' => true
-	);
+
+	public function exitProtocol()
+	{
+		$this->message('message', 'Are you sure you want to quit (Y, N)?');
+		$this->message('cursor');
+		$handle = fopen('php://stdin', 'r');
+		$handle_ = explode(' ' , trim(fgets($handle)));
+		switch(strtolower($handle_[0]))
+		{
+			case "yes":
+			case "ye":
+			case "yep":
+			case "sure":
+			case "yes please":
+			case "y":
+				fwrite($this->debug_file, "Bot closed using exitProtocol().\n");
+				fclose($handle);
+
+				$temp_destroy_config = fopen('config-bot.txt', 'w+');
+				fclose($temp_destroy_config);
+				$temp_config = fopen('config-bot.txt', 'a+');
+				fwrite($temp_config, json_encode($this->config));
+				fclose($temp_config);
+				$temp_destroy_config_ = fopen('config-mysql.txt', 'w+');
+				fclose($temp_destroy_config_);
+				$temp_config_ = fopen('config-mysql.txt', 'a+');
+				fwrite($temp_config_, json_encode($this->mysql));
+				fclose($temp_config_);
+
+				$this->message('message', 'Goodbye!');
+				exit;
+			break;
+			case "no":
+			case "n":
+			case "nah":
+			case "no please":
+			case "na":
+				fwrite($this->debug_file, "Bot was almost closed using exitProtocol().\n");
+				fclose($handle);
+				$this->console();
+			break;
+			default:
+				$this->message('error', 'Unknown variable used in exitProtocol.');
+				$this->message('error', 'Please type "y" (for yes) or "n" (for no).');
+				$this->exitProtocol();
+			break;
+		}
+	}
 
 	public function message($type, $message)
 	{
@@ -405,20 +449,7 @@ class Bot
 			case "close":
 			case "leave":
 			case "destroy":
-				$temp_destroy_config = fopen('config-bot.txt', 'w+');
-				fclose($temp_destroy_config);
-				$temp_config = fopen('config-bot.txt', 'a+');
-				fwrite($temp_config, json_encode($this->config));
-				fclose($temp_config);
-				$temp_destroy_config_ = fopen('config-mysql.txt', 'w+');
-				fclose($temp_destroy_config_);
-				$temp_config_ = fopen('config-mysql.txt', 'a+');
-				fwrite($temp_config_, json_encode($this->mysql));
-				fclose($temp_config_);
-
-				fclose($handle);
-				$this->message('message', 'Goodbye!');
-				exit;
+				$this->exitProtocol();
 			break;
 			default:
 				$this->message('error', 'Unknown command, "' . $ex[0] . '". Type, "help" for a list of commands.');
@@ -464,16 +495,13 @@ class Bot
 		switch($cmd)
 		{
 			case ":!echo":
+			case ":!say":
 				for($i = 4; $i < count($ex); $i++)
 				{
 					if($i == 4)
-					{
 						$msg = $ex[$i];
-					}
 					else
-					{
 						$msg = $msg . ' ' . $ex[$i];
-					}
 				}
 				
 				fputs($this->socket, "PRIVMSG " . $ex[2] . " :" . $msg . "\n"); $this->message('sent', 'Sent a message to, "' . $ex[2] . '".'); $this->message('sent', 'Saying, "' . trim($msg) . '".');
@@ -511,19 +539,7 @@ class Bot
 				$this->console();
 			break;
 			case ":!exit":
-				$temp_destroy_config = fopen('config-bot.txt', 'w+');
-				fclose($temp_destroy_config);
-				$temp_config = fopen('config-bot.txt', 'a+');
-				fwrite($temp_config, json_encode($this->config));
-				fclose($temp_config);
-				$temp_destroy_config_ = fopen('config-mysql.txt', 'w+');
-				fclose($temp_destroy_config_);
-				$temp_config_ = fopen('config-mysql.txt', 'a+');
-				fwrite($temp_config_, json_encode($this->mysql));
-				fclose($temp_config_);
-				fclose($this->socket); $this->message('info', 'Socket closed.');
-				$this->message('message', 'Goodbye!');
-				exit;
+				$this->exitProtocol();
 			break;
 		}
 		
