@@ -7,7 +7,7 @@ The current console commands are:
 
 help (update, default, keys mysql, or just leave it empty for commands)
 
-stop,close,quit,exit,destroy,leave (to close out of the console)
+stop,close,quit,exit,destroy,leave (to close out of the console (doesn't fully close the bot))
 
 update (key variable, see "help update" for more information)
 
@@ -27,13 +27,15 @@ The current chat commands are:
 
 !echo (message)
 
+!say (message)
+
 !google (what to search on google)
 
 !youtube (what to search on youtube)
 
-!join (chat room)
+!join (chat room, no hashtag needed)
 
 !quit (makes the bot disconnect & goes back to the console)
 
-!exit (disconnects the bot & closes the console)
+!exit (disconnects the bot & closes the console (check the console to fully close the bot))
 
