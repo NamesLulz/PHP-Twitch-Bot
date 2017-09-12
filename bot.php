@@ -398,6 +398,11 @@ class Bot
 				}
 			break;
 			case "check":
+				if($ex[1] == "" || $ex[1] == null)
+				{
+					$this->message('error', 'Cannot check an empty key!');
+				}
+				
 				$found = false;
 				
 				if($ex[1] == "connection")
