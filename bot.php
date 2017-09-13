@@ -69,48 +69,48 @@ class Bot
 		}
 	}
 
-	public function message($type, $message)
+	public function message($type, $message = null)
 	{
 		$message = trim($message);
 		switch(strtolower($type))
 		{
-			case "message":
-				echo "= Message: " . $message . "\n";
-				fwrite($this->debug_file, 'message: ' . $message . "\n");
-			break;
-			case "info":
-				echo "= Info: " . $message . "\n";
-				fwrite($this->debug_file, 'info: ' . $message . "\n");
-			break;
 			case "cursor":
 				echo "> ";
 			break;
+			case "message":
+				echo "[Message] : " . $message . "\n";
+				fwrite($this->debug_file, 'message: ' . $message . "\n");
+			break;
+			case "info":
+				echo "[Info] : " . $message . "\n";
+				fwrite($this->debug_file, 'info: ' . $message . "\n");
+			break;
 			case "commands":
-				echo "= Commands: " . $message . "\n";
+				echo "[Commands] : " . $message . "\n";
 				fwrite($this->debug_file, 'commands: ' . $message . "\n");
 			break;
 			case "error":
-				echo "= Error: " . $message . "\n";
+				echo "[Error] : " . $message . "\n";
 				fwrite($this->debug_file, 'error: ' . $message . "\n");
 			break;
 			case "sent":
-				echo "= Sent data: " . $message . "\n";
+				echo "[Sent data] : " . $message . "\n";
 				fwrite($this->debug_file, 'sent: ' . $message . "\n");
 			break;
 			case "received":
-				echo "= Received data: " . $message . "\n";
+				echo "[Received data] : " . $message . "\n";
 				fwrite($this->debug_file, 'received: ' . $message . "\n");
 			break;
 			case "check":
-				echo "= Checked (key : value): " . $message . "\n";
+				echo "[Checked (key : value)] : " . $message . "\n";
 				fwrite($this->debug_file, 'check: ' . $message . "\n");
 			break;
 			case "query":
-				echo "= Query result: " . $message . "\n";
+				echo "[Query result] : " . $message . "\n";
 				fwrite($this->debug_file, 'query result: ' . $message . "\n");
 			break;
 			default:
-				echo "= Error: Unknown type used, " . trim($type) . "\n";
+				echo "[Error] : Unknown type used, " . trim($type) . "\n";
 				fwrite($this->debug_file, 'error: ' . trim($type) . "\n");
 			break;
 		}
@@ -398,12 +398,12 @@ class Bot
 				}
 			break;
 			case "check":
+				$found = false;
 				if($ex[1] == "" || $ex[1] == null)
 				{
 					$this->message('error', 'Cannot check an empty key!');
+					break;
 				}
-				
-				$found = false;
 				
 				if($ex[1] == "connection")
 				{
@@ -441,6 +441,12 @@ class Bot
 							$this->message('error', 'Unable to find key, "' . $ex[1] . '".');
 							$found = true;
 						}
+					}
+
+					if($found == false)
+					{
+						$this->message('error', 'Unable to find key, "' . $ex[1] . '".');
+						$found = true;
 					}
 				}
 			break;
